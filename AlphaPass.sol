@@ -23,10 +23,10 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
     }
 
     function whitelistMint(uint256 quantity, bytes memory signature) external payable nonReentrant {
+        require(tx.origin == msg.sender, "Contracts not allowed");
         require(!_isMinted[_msgSender()], "User is minted");
         require(verify(signature, _msgSender()), "Verify failed");
 
-        require(tx.origin == msg.sender, "Contracts not allowed");
         uint256 totalsupply = totalSupply();
         require(totalsupply + quantity <= maxQty, "Exceed sales max limit");
         require(
