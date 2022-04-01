@@ -101,6 +101,6 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
     }
 
     function isMinted(address addr) external view returns (bool) {
-    return _isMinted[addr];
-  }
+        return _isMinted[addr];
+    }
 }
