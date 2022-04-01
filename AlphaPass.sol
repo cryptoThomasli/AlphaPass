@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
     uint256 public immutable maxQty = 1024;
+    uint256 public immutable reserveQty = 300;
+    uint256 public tokensReserved;
     // TODO: mintPrice to be decided
     uint256 public immutable mintPrice = 0.01 ether;
     uint256 public immutable maxMintPerAddr = 1;
@@ -20,6 +22,19 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
         ERC721A("AlphaPass", "AlphaPass")
     {
         _baseTokenURI = baseURI;
+    }
+
+    function reserve(address recipient, uint256 quantity) external onlyOwner {
+        require(quantity > 0, "Quantity too low");
+        uint256 totalsupply = totalSupply();
+        require(totalsupply + quantity <= maxQty, "Exceed sales max limit");
+        require(
+            tokensReserved + quantity <= reserveQty,
+            "Max reserve quantity exceeded"
+        );
+
+        _safeMint(recipient, amount);
+        tokensReserved += amount;  
     }
 
     function whitelistMint(uint256 quantity, bytes memory signature) external payable nonReentrant {
