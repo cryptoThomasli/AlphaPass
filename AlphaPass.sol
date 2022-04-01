@@ -7,9 +7,9 @@ import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
-    uint256 public immutable maxQty = 2000;
+    uint256 public immutable maxQty = 1024;
     uint256 public immutable mintPrice = 0.01 ether;
-    uint256 public immutable maxMintPerAddr = 10;
+    uint256 public immutable maxMintPerAddr = 1;
     string private _baseTokenURI;
 
     // Flag whether address is minted or not
