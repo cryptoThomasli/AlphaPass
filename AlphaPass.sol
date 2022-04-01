@@ -31,6 +31,7 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
     uint256 public _tokensMintedStage1 = 0;
     uint256 public _tokensMintedStage2 = 0;
     uint256 public _tokensMintedStage3 = 0;
+    bool public _isPublicMintOpen = false;
 
     constructor(string memory baseURI)
         ERC721A("AlphaPass", "AlphaPass")
@@ -41,6 +42,11 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
     function nextStage() external onlyOwner {
         require(_stage <= 4, "Stage cannot be more than 4");
         _stage++;
+        _isPublicMintOpen = false;
+    }
+
+    function setIsPublicMintOpen(bool isPublicMintOpen) external onlyOwner {
+        _isPublicMintOpen = isPublicMintOpen;
     }
 
     function reserve(address recipient, uint256 quantity) external onlyOwner {
@@ -83,6 +89,8 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
     }
 
     function mint(uint256 quantity) external payable nonReentrant {
+        require(_isPublicMintOpen, "public sales not opening");
+
         require(_stage == 1 || _stage == 2 || _stage == 3, "invalid stage");
         require(isStageMaxQtyExceed(quantity), "Exceed stage sales max limit");
         require(!_isMinted[_msgSender()], "User is minted");
