@@ -38,6 +38,11 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
         _baseTokenURI = baseURI;
     }
 
+    function nextStage() external onlyOwner {
+        require(stage <= 4, "Stage cannot be more than 4");
+        stage++;
+    }
+
     function reserve(address recipient, uint256 quantity) external onlyOwner {
         require(quantity > 0, "Quantity too low");
         uint256 totalsupply = totalSupply();
