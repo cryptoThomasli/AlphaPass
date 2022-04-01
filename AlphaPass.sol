@@ -18,6 +18,20 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
     // Flag whether address is minted or not
     mapping(address => bool) private _isMinted;
 
+    //sale stages:
+    //stage 0: init(no minting, only reserve)
+    //stage 1: 200 whitelist mint
+    //stage 2: 200 whitelist mint, 100 public mint
+    //stage 3: 150 whitelist mint, 50 public mint
+    //stage 4: only reserve
+    uint8 public _stage = 0;
+    uint256 public immutable maxQtyStage1 = 200;
+    uint256 public immutable maxQtyStage2 = 300;
+    uint256 public immutable maxQtyStage3 = 200;
+    uint256 public _tokensMintedStage1 = 0;
+    uint256 public _tokensMintedStage2 = 0;
+    uint256 public _tokensMintedStage3 = 0;
+
     constructor(string memory baseURI)
         ERC721A("AlphaPass", "AlphaPass")
     {
@@ -40,6 +54,8 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
     function whitelistMint(uint256 quantity, bytes memory signature) external payable nonReentrant {
         require(verify(signature, _msgSender()), "Verify failed");
 
+        require(_stage == 1 || _stage == 2 || _stage == 3, "invalid stage");
+        require(isStageMaxQtyExceed(quantity), "Exceed stage sales max limit");
         require(!_isMinted[_msgSender()], "User is minted");
         require(tx.origin == msg.sender, "Contracts not allowed");
         uint256 totalsupply = totalSupply();
@@ -58,9 +74,12 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
 
         _isMinted[_msgSender()] = true;
         _safeMint(msg.sender, quantity);
+        increaseTokensMinted(quantity);
     }
 
     function mint(uint256 quantity) external payable nonReentrant {
+        require(_stage == 1 || _stage == 2 || _stage == 3, "invalid stage");
+        require(isStageMaxQtyExceed(quantity), "Exceed stage sales max limit");
         require(!_isMinted[_msgSender()], "User is minted");
         require(tx.origin == msg.sender, "Contracts not allowed");
         uint256 totalsupply = totalSupply();
@@ -78,6 +97,7 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
 
         _isMinted[_msgSender()] = true;
         _safeMint(msg.sender, quantity);
+        increaseTokensMinted(quantity);
     }
 
     function verify(bytes memory signature, address target) internal view returns (bool) {
@@ -102,6 +122,31 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
 
     function isMinted(address addr) external view returns (bool) {
         return _isMinted[addr];
+    }
+
+    function isStageMaxQtyExceed(uint256 quantity) internal view returns (bool) {
+        if (_stage == 1) {
+            return _tokensMintedStage1 + quantity <= maxQtyStage1;
+        }
+        if (_stage == 2) {
+            return _tokensMintedStage2 + quantity <= maxQtyStage2;
+        }
+        if (_stage == 3) {
+            return _tokensMintedStage3 + quantity <= maxQtyStage3;
+        }
+        return false;
+    }
+
+    function increaseTokensMinted(uint256 quantity) internal {
+        if (_stage == 1) {
+            _tokensMintedStage1 += quantity;
+        }
+        if (_stage == 2) {
+            _tokensMintedStage2 += quantity;
+        }
+        if (_stage == 3) {
+            _tokensMintedStage3 += quantity;
+        }
     }
 
     function withdraw() external nonReentrant onlyOwner {
