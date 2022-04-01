@@ -47,8 +47,8 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
             "Max reserve quantity exceeded"
         );
 
-        _safeMint(recipient, amount);
-        tokensReserved += amount;  
+        _safeMint(recipient, quantity);
+        tokensReserved += quantity;  
     }
 
     function whitelistMint(uint256 quantity, bytes memory signature) external payable nonReentrant {
