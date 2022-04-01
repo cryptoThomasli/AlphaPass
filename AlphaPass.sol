@@ -151,7 +151,7 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
 
     function withdraw() external nonReentrant onlyOwner {
         uint256 balance = address(this).balance;
-        (bool success1, ) = payable(marketingWallet).call{ value: balance }("");
+        (bool success1, ) = payable(_msgSender()).call{ value: balance }("");
         require(success1, "Transfer failed.");
     }
 
