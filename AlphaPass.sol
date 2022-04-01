@@ -15,9 +15,6 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
     uint256 public immutable maxMintPerAddr = 1;
     string private _baseTokenURI;
 
-    // Flag whether address is minted or not
-    mapping(address => bool) private _isMinted;
-
     //sale stages:
     //stage 0: init(no minting, only reserve)
     //stage 1: 200 whitelist mint
@@ -67,7 +64,6 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
 
         require(_stage == 1 || _stage == 2 || _stage == 3, "invalid stage");
         require(isStageMaxQtyExceed(quantity), "Exceed stage sales max limit");
-        require(!_isMinted[_msgSender()], "User is minted");
         require(tx.origin == msg.sender, "Contracts not allowed");
         uint256 totalsupply = totalSupply();
         require(totalsupply + quantity <= maxQty, "Exceed sales max limit");
@@ -82,8 +78,6 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
         }
         require(msg.value == cost, "wrong payment");
 
-
-        _isMinted[_msgSender()] = true;
         _safeMint(msg.sender, quantity);
         increaseTokensMinted(quantity);
     }
@@ -93,7 +87,6 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
 
         require(_stage == 1 || _stage == 2 || _stage == 3, "invalid stage");
         require(isStageMaxQtyExceed(quantity), "Exceed stage sales max limit");
-        require(!_isMinted[_msgSender()], "User is minted");
         require(tx.origin == msg.sender, "Contracts not allowed");
         uint256 totalsupply = totalSupply();
         require(totalsupply + quantity <= maxQty, "Exceed sales max limit");
@@ -108,7 +101,6 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
         }
         require(msg.value == cost, "wrong payment");
 
-        _isMinted[_msgSender()] = true;
         _safeMint(msg.sender, quantity);
         increaseTokensMinted(quantity);
     }
@@ -131,10 +123,6 @@ contract AlphaNft is Ownable, ERC721A, ReentrancyGuard {
 
     function setBaseURI(string calldata baseURI) external onlyOwner {
         _baseTokenURI = baseURI;
-    }
-
-    function isMinted(address addr) external view returns (bool) {
-        return _isMinted[addr];
     }
 
     function isStageMaxQtyExceed(uint256 quantity) internal view returns (bool) {
